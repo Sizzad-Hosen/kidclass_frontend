@@ -18,12 +18,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { getAuthErrorMessage } from "@/features/auth/auth-errors";
-import { useLoginMutation } from "@/features/auth/authApi";
-import { loginSchema, type LoginFormValues } from "@/features/auth/authSchemas";
-import { setCredentials } from "@/features/auth/authSlice";
-import { roleRedirectPath } from "@/lib/auth-types";
-import { useAppDispatch } from "@/lib/hooks";
+import { getAuthErrorMessage } from "@/redux/features/auth/auth-errors";
+import { useLoginMutation } from "@/redux/features/auth/authApi";
+import { loginSchema, type LoginFormValues } from "@/redux/features/auth/authSchemas";
+import { setCredentials } from "@/redux/features/auth/authSlice";
+import { roleRedirectPath } from "@/redux/features/auth/types";
+import { useAppDispatch } from "@/redux/hooks";
 
 export function LoginForm() {
   const dispatch = useAppDispatch();

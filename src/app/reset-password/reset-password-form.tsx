@@ -19,12 +19,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { getAuthErrorMessage } from "@/features/auth/auth-errors";
-import { useResetPasswordMutation } from "@/features/auth/authApi";
+import { getAuthErrorMessage } from "@/redux/features/auth/auth-errors";
+import { useResetPasswordMutation } from "@/redux/features/auth/authApi";
 import {
   resetPasswordSchema,
   type ResetPasswordFormValues,
-} from "@/features/auth/authSchemas";
+} from "@/redux/features/auth/authSchemas";
 
 export function ResetPasswordForm() {
   const router = useRouter();

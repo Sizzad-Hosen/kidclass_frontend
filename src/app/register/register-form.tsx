@@ -25,15 +25,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getAuthErrorMessage } from "@/features/auth/auth-errors";
-import { useRegisterMutation } from "@/features/auth/authApi";
+import { getAuthErrorMessage } from "@/redux/features/auth/auth-errors";
+import { useRegisterMutation } from "@/redux/features/auth/authApi";
 import {
   registerSchema,
   type RegisterFormValues,
-} from "@/features/auth/authSchemas";
-import { setCredentials } from "@/features/auth/authSlice";
-import { roleRedirectPath } from "@/lib/auth-types";
-import { useAppDispatch } from "@/lib/hooks";
+} from "@/redux/features/auth/authSchemas";
+import { setCredentials } from "@/redux/features/auth/authSlice";
+import { roleRedirectPath } from "@/redux/features/auth/types";
+import { useAppDispatch } from "@/redux/hooks";
 
 const classes = ["Class 1", "Class 2", "Class 3", "Class 4", "Class 5"];
 
@@ -54,7 +54,11 @@ export function RegisterForm() {
 
   const onSubmit = async (values: RegisterFormValues) => {
     try {
-      const response = await registerUser(values).unwrap();
+      const response = await registerUser({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+      }).unwrap();
       dispatch(setCredentials(response.data));
       toast.success(response.message || "Your KidClass profile is ready.");
       router.replace(roleRedirectPath(response.data.user?.role));

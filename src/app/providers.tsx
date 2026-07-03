@@ -3,7 +3,7 @@
 import { Provider } from "react-redux";
 import { Toaster } from "sonner";
 
-import { store } from "@/lib/store";
+import { store } from "@/redux/store";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (

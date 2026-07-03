@@ -1,12 +1,16 @@
-import { baseApi } from "@/lib/api";
-import type { ApiResponse, AuthPayload, AuthUser } from "@/lib/auth-types";
+import { baseApi } from "@/redux/api/baseApi";
+import type {
+  ApiResponse,
+  AuthPayload,
+  AuthUser,
+} from "@/redux/features/auth/types";
+
+const authRoute = "/auth";
 
 export type RegisterRequest = {
   name: string;
   email: string;
   password: string;
-  role: "student" | "admin";
-  classLevel?: string;
 };
 
 export type LoginRequest = {
@@ -27,13 +31,11 @@ export type RefreshTokenRequest = {
   refreshToken: string;
 };
 
-const AUTH_URL = "/auth";
-
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     register: builder.mutation<ApiResponse<AuthPayload>, RegisterRequest>({
       query: (body) => ({
-        url: `${AUTH_URL}/register`,
+        url: `${authRoute}/register`,
         method: "POST",
         body,
       }),
@@ -41,7 +43,7 @@ export const authApi = baseApi.injectEndpoints({
     }),
     login: builder.mutation<ApiResponse<AuthPayload>, LoginRequest>({
       query: (body) => ({
-        url: `${AUTH_URL}/login`,
+        url: `${authRoute}/login`,
         method: "POST",
         body,
       }),
@@ -52,7 +54,7 @@ export const authApi = baseApi.injectEndpoints({
       ForgotPasswordRequest
     >({
       query: (body) => ({
-        url: `${AUTH_URL}/forgot-password`,
+        url: `${authRoute}/forgot-password`,
         method: "POST",
         body,
       }),
@@ -62,27 +64,27 @@ export const authApi = baseApi.injectEndpoints({
       ResetPasswordRequest
     >({
       query: (body) => ({
-        url: `${AUTH_URL}/reset-password`,
+        url: `${authRoute}/reset-password`,
         method: "POST",
         body,
       }),
     }),
     refreshToken: builder.mutation<ApiResponse<AuthPayload>, RefreshTokenRequest>({
       query: (body) => ({
-        url: `${AUTH_URL}/refresh-token`,
+        url: `${authRoute}/refresh-token`,
         method: "POST",
         body,
       }),
     }),
     logoutUser: builder.mutation<ApiResponse<null>, void>({
       query: () => ({
-        url: `${AUTH_URL}/logout`,
+        url: `${authRoute}/logout`,
         method: "POST",
       }),
       invalidatesTags: ["Me"],
     }),
     me: builder.query<ApiResponse<AuthUser>, void>({
-      query: () => `${AUTH_URL}/me`,
+      query: () => `${authRoute}/me`,
       providesTags: ["Me"],
     }),
   }),

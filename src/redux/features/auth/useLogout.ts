@@ -3,9 +3,9 @@
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { useLogoutUserMutation } from "@/features/auth/authApi";
-import { logout } from "@/features/auth/authSlice";
-import { useAppDispatch } from "@/lib/hooks";
+import { useLogoutUserMutation } from "@/redux/features/auth/authApi";
+import { logout } from "@/redux/features/auth/authSlice";
+import { useAppDispatch } from "@/redux/hooks";
 
 export function useLogout() {
   const dispatch = useAppDispatch();

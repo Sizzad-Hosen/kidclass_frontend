@@ -4,8 +4,8 @@ import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import { roleRedirectPath } from "@/lib/auth-types";
-import { useAppSelector } from "@/lib/hooks";
+import { roleRedirectPath } from "@/redux/features/auth/types";
+import { useAppSelector } from "@/redux/hooks";
 
 export function RoleRedirect() {
   const router = useRouter();

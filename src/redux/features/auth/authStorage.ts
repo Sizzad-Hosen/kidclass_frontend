@@ -1,4 +1,4 @@
-import type { AuthState } from "@/lib/auth-types";
+import type { AuthState } from "@/redux/features/auth/types";
 
 const AUTH_STORAGE_KEY = "kidclass_auth";
 

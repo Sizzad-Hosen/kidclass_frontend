@@ -17,12 +17,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { getAuthErrorMessage } from "@/features/auth/auth-errors";
-import { useForgotPasswordMutation } from "@/features/auth/authApi";
+import { getAuthErrorMessage } from "@/redux/features/auth/auth-errors";
+import { useForgotPasswordMutation } from "@/redux/features/auth/authApi";
 import {
   forgotPasswordSchema,
   type ForgotPasswordFormValues,
-} from "@/features/auth/authSchemas";
+} from "@/redux/features/auth/authSchemas";
 
 export function ForgotPasswordForm() {
   const [forgotPassword, { isLoading }] = useForgotPasswordMutation();

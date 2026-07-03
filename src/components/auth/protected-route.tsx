@@ -5,11 +5,11 @@ import { Loader2 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { useMeQuery } from "@/features/auth/authApi";
-import { logout, setUser } from "@/features/auth/authSlice";
-import { getAuthErrorMessage } from "@/features/auth/auth-errors";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import type { UserRole } from "@/lib/auth-types";
+import { useMeQuery } from "@/redux/features/auth/authApi";
+import { logout, setUser } from "@/redux/features/auth/authSlice";
+import { getAuthErrorMessage } from "@/redux/features/auth/auth-errors";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import type { UserRole } from "@/redux/features/auth/types";
 
 type ProtectedRouteProps = {
   children: React.ReactNode;

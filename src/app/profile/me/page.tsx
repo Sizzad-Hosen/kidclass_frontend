@@ -11,8 +11,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useLogout } from "@/features/auth/useLogout";
-import { useAppSelector } from "@/lib/hooks";
+import { useLogout } from "@/redux/features/auth/useLogout";
+import { useAppSelector } from "@/redux/hooks";
 
 export default function ProfilePage() {
   const user = useAppSelector((state) => state.auth.user);

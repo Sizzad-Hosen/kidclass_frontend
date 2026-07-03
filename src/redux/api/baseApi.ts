@@ -1,17 +1,20 @@
+import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 import {
   createApi,
   fetchBaseQuery,
   type FetchArgs,
   type FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
-import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 
-import { logout, setCredentials } from "@/features/auth/authSlice";
-import type { AuthPayload, ApiResponse } from "@/lib/auth-types";
-import type { RootState } from "@/lib/store";
+import { logout, setCredentials } from "@/redux/features/auth/authSlice";
+import type { ApiResponse, AuthPayload } from "@/redux/features/auth/types";
+import type { RootState } from "@/redux/store";
+
+export const baseUrl =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api/v1";
 
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: "http://localhost:5000/api/v1",
+  baseUrl,
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.accessToken;
 
@@ -23,7 +26,7 @@ const rawBaseQuery = fetchBaseQuery({
   },
 });
 
-const baseQueryWithRefresh: BaseQueryFn<
+const baseQueryWithReAuth: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
@@ -62,7 +65,7 @@ const baseQueryWithRefresh: BaseQueryFn<
 
 export const baseApi = createApi({
   reducerPath: "baseApi",
-  baseQuery: baseQueryWithRefresh,
+  baseQuery: baseQueryWithReAuth,
   tagTypes: ["Me"],
   endpoints: () => ({}),
 });

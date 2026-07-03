@@ -1,7 +1,11 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-import { clearAuthState, emptyAuthState, saveAuthState } from "@/lib/auth-storage";
-import type { AuthPayload, AuthState, AuthUser } from "@/lib/auth-types";
+import {
+  clearAuthState,
+  emptyAuthState,
+  saveAuthState,
+} from "@/redux/features/auth/authStorage";
+import type { AuthPayload, AuthState, AuthUser } from "@/redux/features/auth/types";
 
 const normalizeAuthPayload = (
   payload: AuthPayload,

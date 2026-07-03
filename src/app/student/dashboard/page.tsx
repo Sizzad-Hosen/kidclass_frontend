@@ -5,7 +5,7 @@ import { BookOpen, UserRound } from "lucide-react";
 
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAppSelector } from "@/lib/hooks";
+import { useAppSelector } from "@/redux/hooks";
 
 export default function StudentDashboardPage() {
   const user = useAppSelector((state) => state.auth.user);
