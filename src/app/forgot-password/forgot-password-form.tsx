@@ -50,7 +50,6 @@ export function ForgotPasswordForm() {
       compact
       title="Lost your key?"
       subtitle="Our friendly helper will guide you back to the adventure."
-      mascot="panda"
       tone="pink"
     >
       <Form {...form}>

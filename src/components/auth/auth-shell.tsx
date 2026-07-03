@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { BookOpen, Bot, GraduationCap, ShieldCheck, Sparkles } from "lucide-react";
+import Image from "next/image";
+import { ShieldCheck, Sparkles } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -10,16 +11,8 @@ type AuthShellProps = {
   subtitle: string;
   sideTitle?: string;
   sideSubtitle?: string;
-  mascot?: "owl" | "tiger" | "panda" | "robot";
   tone?: "blue" | "pink" | "violet" | "mint";
   compact?: boolean;
-};
-
-const mascotIcon = {
-  owl: GraduationCap,
-  tiger: BookOpen,
-  panda: ShieldCheck,
-  robot: Bot,
 };
 
 const toneClass = {
@@ -35,12 +28,9 @@ export function AuthShell({
   subtitle,
   sideTitle = "EduAdventure",
   sideSubtitle = "Ready for your next learning quest?",
-  mascot = "owl",
   tone = "blue",
   compact = false,
 }: AuthShellProps) {
-  const MascotIcon = mascotIcon[mascot];
-
   return (
     <main
       className={cn(
@@ -70,9 +60,16 @@ export function AuthShell({
             <aside className="relative hidden min-h-[560px] flex-col items-center justify-center bg-sky-600 p-10 text-center text-white lg:flex">
               <span className="absolute left-0 top-0 size-28 rounded-br-full bg-white/20" />
               <span className="absolute bottom-0 right-0 size-36 rounded-tl-full bg-indigo-300/30" />
-              <div className="relative grid size-72 place-items-center rounded-3xl bg-white/10 shadow-inner">
-                <div className="grid size-52 place-items-center rounded-full bg-white text-sky-700 shadow-2xl">
-                  <MascotIcon className="size-24" />
+              <div className="relative grid size-80 place-items-center rounded-3xl bg-white/10 shadow-inner">
+                <div className="relative size-64 overflow-hidden rounded-3xl bg-white shadow-2xl">
+                  <Image
+                    alt="KidClass cartoon learning mascot"
+                    className="object-cover"
+                    fill
+                    priority
+                    sizes="256px"
+                    src="/kidclass-mascot.png"
+                  />
                 </div>
                 <Sparkles className="absolute right-9 top-8 size-7 text-yellow-300" />
                 <Sparkles className="absolute bottom-14 left-8 size-6 text-yellow-300" />
@@ -86,8 +83,15 @@ export function AuthShell({
 
           <div className="flex min-h-[560px] flex-col justify-center px-6 py-10 sm:px-10 lg:px-16">
             {compact && (
-              <div className="mx-auto mb-6 grid size-24 place-items-center rounded-3xl bg-sky-100 text-sky-700 shadow-lg">
-                <MascotIcon className="size-12" />
+              <div className="relative mx-auto mb-6 size-32 overflow-hidden rounded-3xl bg-sky-100 shadow-lg ring-4 ring-white">
+                <Image
+                  alt="KidClass cartoon learning mascot"
+                  className="object-cover"
+                  fill
+                  priority
+                  sizes="128px"
+                  src="/kidclass-mascot.png"
+                />
               </div>
             )}
             <div className="mb-8 text-center lg:text-left">

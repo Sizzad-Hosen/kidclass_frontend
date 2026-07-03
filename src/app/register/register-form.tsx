@@ -71,7 +71,6 @@ export function RegisterForm() {
       subtitle="Create your learning profile today!"
       sideTitle="Welcome, Explorer!"
       sideSubtitle="Join thousands of friends in a world where learning is the greatest adventure of all."
-      mascot="tiger"
       tone="mint"
     >
       <Form {...form}>

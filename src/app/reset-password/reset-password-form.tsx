@@ -67,7 +67,6 @@ export function ResetPasswordForm() {
       compact
       title="Reset Password"
       subtitle="Pick something strong and fun!"
-      mascot="robot"
       tone="violet"
     >
       <Form {...form}>

@@ -53,7 +53,6 @@ export function LoginForm() {
       title="Welcome Back!"
       subtitle="Sign in to continue your journey."
       sideSubtitle="Ready for your next learning quest?"
-      mascot="owl"
       tone="blue"
     >
       <Form {...form}>
