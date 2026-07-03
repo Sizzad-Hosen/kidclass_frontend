@@ -27,11 +27,13 @@ export type RefreshTokenRequest = {
   refreshToken: string;
 };
 
+const AUTH_URL = "/auth";
+
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     register: builder.mutation<ApiResponse<AuthPayload>, RegisterRequest>({
       query: (body) => ({
-        url: "/auth/register",
+        url: `${AUTH_URL}/register`,
         method: "POST",
         body,
       }),
@@ -39,7 +41,7 @@ export const authApi = baseApi.injectEndpoints({
     }),
     login: builder.mutation<ApiResponse<AuthPayload>, LoginRequest>({
       query: (body) => ({
-        url: "/auth/login",
+        url: `${AUTH_URL}/login`,
         method: "POST",
         body,
       }),
@@ -50,7 +52,7 @@ export const authApi = baseApi.injectEndpoints({
       ForgotPasswordRequest
     >({
       query: (body) => ({
-        url: "/auth/forgot-password",
+        url: `${AUTH_URL}/forgot-password`,
         method: "POST",
         body,
       }),
@@ -60,27 +62,27 @@ export const authApi = baseApi.injectEndpoints({
       ResetPasswordRequest
     >({
       query: (body) => ({
-        url: "/auth/reset-password",
+        url: `${AUTH_URL}/reset-password`,
         method: "POST",
         body,
       }),
     }),
     refreshToken: builder.mutation<ApiResponse<AuthPayload>, RefreshTokenRequest>({
       query: (body) => ({
-        url: "/auth/refresh-token",
+        url: `${AUTH_URL}/refresh-token`,
         method: "POST",
         body,
       }),
     }),
     logoutUser: builder.mutation<ApiResponse<null>, void>({
       query: () => ({
-        url: "/auth/logout",
+        url: `${AUTH_URL}/logout`,
         method: "POST",
       }),
       invalidatesTags: ["Me"],
     }),
     me: builder.query<ApiResponse<AuthUser>, void>({
-      query: () => "/auth/me",
+      query: () => `${AUTH_URL}/me`,
       providesTags: ["Me"],
     }),
   }),
