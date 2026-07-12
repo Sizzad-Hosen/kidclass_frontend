@@ -27,6 +27,11 @@ export type ResetPasswordRequest = {
   password: string;
 };
 
+export type ChangePasswordRequest = {
+  currentPassword: string;
+  newPassword: string;
+};
+
 export type RefreshTokenRequest = {
   refreshToken: string;
 };
@@ -69,6 +74,16 @@ export const authApi = baseApi.injectEndpoints({
         body,
       }),
     }),
+    changePassword: builder.mutation<
+      ApiResponse<{ changed: boolean }>,
+      ChangePasswordRequest
+    >({
+      query: (body) => ({
+        url: `${authRoute}/change-password`,
+        method: "POST",
+        body,
+      }),
+    }),
     refreshToken: builder.mutation<ApiResponse<AuthPayload>, RefreshTokenRequest>({
       query: (body) => ({
         url: `${authRoute}/refresh-token`,
@@ -91,6 +106,7 @@ export const authApi = baseApi.injectEndpoints({
 });
 
 export const {
+  useChangePasswordMutation,
   useForgotPasswordMutation,
   useLazyMeQuery,
   useLoginMutation,

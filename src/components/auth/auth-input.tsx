@@ -30,7 +30,7 @@ export function PasswordInput({
   className,
   icon = Lock,
   ...props
-}: Omit<AuthInputProps, "type"> & { icon?: LucideIcon }) {
+}: Omit<AuthInputProps, "type" | "icon"> & { icon?: LucideIcon }) {
   const [visible, setVisible] = React.useState(false);
 
   return (
