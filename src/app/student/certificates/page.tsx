@@ -28,7 +28,8 @@ export default function StudentCertificatesPage() {
                 <Card className="rounded-[2rem] border-emerald-100 bg-white p-6" key={getId(certificate)}>
                   <CardContent>
                     <Award className="size-12 text-amber-500" />
-                    <h2 className="mt-4 text-2xl font-black">{certificate.enrollment?.course?.title ?? "Course Certificate"}</h2>
+                    <h2 className="mt-4 text-2xl font-black">{certificate.courseName ?? certificate.enrollment?.course?.title ?? "Course Certificate"}</h2>
+                    {certificate.className || certificate.subject ? <p className="mt-2 font-bold text-emerald-700">{[certificate.className, certificate.subject].filter(Boolean).join(" · ")}</p> : null}
                     <p className="mt-2 font-mono text-sm text-slate-500">{certificate.certificateNo}</p>
                     <Button asChild className="mt-5 rounded-full bg-emerald-600">
                       <Link href={`/certificates/verify/${certificate.certificateNo}`}>View Certificate</Link>

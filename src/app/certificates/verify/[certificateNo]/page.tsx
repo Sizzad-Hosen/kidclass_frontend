@@ -34,13 +34,16 @@ export default function VerifyCertificatePage() {
                 <BadgeCheck className="size-10" />
               </div>
               <Badge className="mt-6" variant="green">Valid Certificate</Badge>
-              <h1 className="mt-4 text-4xl font-black text-sky-700">{data.certificateNo}</h1>
+              <p className="mt-6 text-sm font-bold uppercase tracking-[.3em] text-sky-700">Certificate of Completion</p>
+              <h1 className="mt-4 font-serif text-4xl font-black text-slate-900">{data.recipientName ?? "KidClass Student"}</h1>
+              <p className="mt-4 text-lg text-slate-600">completed 100% of <strong>{data.courseName ?? data.enrollment?.course?.title ?? "a KidClass course"}</strong></p>
+              {data.className || data.subject ? <p className="mt-2 font-bold text-sky-800">{[data.className, data.subject].filter(Boolean).join(" · ")}</p> : null}
               <p className="mt-3 text-slate-600">
                 Issued {data.issuedAt ? new Date(data.issuedAt).toLocaleDateString() : "recently"}
               </p>
-              <p className="mt-6 text-lg font-bold">
-                This KidClass certificate is active and publicly verified.
-              </p>
+              {data.issuerName ? <div className="mx-auto mt-8 max-w-sm border-t border-slate-300 pt-3"><p className="font-bold">{data.issuerName}</p><p className="text-xs text-slate-400">{data.issuerEmail}</p></div> : null}
+              <p className="mt-8 font-mono text-sm text-slate-500">{data.certificateNo}</p>
+              <p className="mt-3 text-sm font-bold text-emerald-700">This KidClass certificate is active and publicly verified.</p>
             </CardContent>
           </Card>
         ) : null}

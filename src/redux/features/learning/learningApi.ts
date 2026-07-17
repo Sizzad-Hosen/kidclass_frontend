@@ -138,6 +138,13 @@ export type Certificate = {
   certificateNo?: string;
   issuedAt?: string;
   certificateUrl?: string;
+  recipientName?: string;
+  recipientEmail?: string;
+  courseName?: string;
+  className?: string;
+  subject?: string;
+  issuerName?: string;
+  issuerEmail?: string;
   enrollment?: Enrollment;
   status?: "valid" | string;
 };
