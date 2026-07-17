@@ -25,6 +25,7 @@ const structureTags = [
 ];
 
 export const courseManagementApi = baseApi.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     getManagedCourses: builder.query<Course[], void>({
       query: () => "/courses",
@@ -45,14 +46,14 @@ export const courseManagementApi = baseApi.injectEndpoints({
       transformResponse: data<CourseStructure>,
       providesTags: (_r, _e, id) => [{ type: "CourseStructure", id }],
     }),
-    createCourse: builder.mutation<Course, CoursePayload>({
+    createCourse: builder.mutation<Course, CoursePayload | FormData>({
       query: (body) => ({ url: "/courses", method: "POST", body }),
       transformResponse: data<Course>,
       invalidatesTags: ["Courses"],
     }),
     updateCourse: builder.mutation<
       Course,
-      { id: string; body: Partial<CoursePayload> }
+      { id: string; body: Partial<CoursePayload> | FormData }
     >({
       query: ({ id, body }) => ({
         url: `/courses/${id}`,

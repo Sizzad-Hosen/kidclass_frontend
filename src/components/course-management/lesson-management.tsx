@@ -41,8 +41,6 @@ import type {
 
 const referenceId = (reference: EntityRef | string) =>
   typeof reference === "string" ? reference : reference._id;
-const MAX_VIDEO_SIZE = 25 * 1024 * 1024;
-
 const lessonTypeIcon = {
   video: FileVideo,
   text: FileText,
@@ -75,7 +73,14 @@ export function LessonManagement() {
   const [videoUrl, setVideoUrl] = useState("");
   const [video, setVideo] = useState<File | null>(null);
 
-  const activeCourseId = selectedCourseId || courses[0]?._id || "";
+  const defaultCourseId =
+    courses.find((course) => {
+      const milestoneIds = milestones
+        .filter((milestone) => referenceId(milestone.course) === course._id)
+        .map((milestone) => milestone._id);
+      return modules.some((moduleItem) => milestoneIds.includes(referenceId(moduleItem.milestone)));
+    })?._id ?? courses[0]?._id ?? "";
+  const activeCourseId = selectedCourseId || defaultCourseId;
   const courseMilestones = milestones
     .filter((milestone) => referenceId(milestone.course) === activeCourseId)
     .sort((a, b) => a.order - b.order);
@@ -146,10 +151,6 @@ export function LessonManagement() {
     }
     if (!file.type.startsWith("video/")) {
       toast.error("Choose a valid video file.");
-      return;
-    }
-    if (file.size > MAX_VIDEO_SIZE) {
-      toast.error("Video files must be 25 MB or smaller.");
       return;
     }
     setVideo(file);
@@ -276,6 +277,36 @@ export function LessonManagement() {
           </Button>
         </div>
 
+        {courses.length ? (
+          <div className="mb-5 grid gap-3 rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm md:grid-cols-3">
+            <SelectField
+              disabled={false}
+              label="1. Course"
+              onChange={changeCourse}
+              options={courses.map((course) => ({ id: course._id, label: course.title }))}
+              value={activeCourseId}
+            />
+            <SelectField
+              disabled={!courseMilestones.length}
+              label="2. Milestone"
+              onChange={changeMilestone}
+              options={courseMilestones.length
+                ? courseMilestones.map((milestone) => ({ id: milestone._id, label: `${milestone.order}. ${milestone.title}` }))
+                : [{ id: "", label: "No milestone in this course" }]}
+              value={activeMilestoneId}
+            />
+            <SelectField
+              disabled={!milestoneModules.length}
+              label="3. Parent module"
+              onChange={changeModule}
+              options={milestoneModules.length
+                ? milestoneModules.map((moduleItem) => ({ id: moduleItem._id, label: `${moduleItem.order}. ${moduleItem.title}` }))
+                : [{ id: "", label: "No module in this milestone" }]}
+              value={activeModuleId}
+            />
+          </div>
+        ) : null}
+
         {loading ? (
           <div className="grid gap-5 xl:grid-cols-[430px_1fr]">
             <Skeleton className="h-[700px] rounded-3xl" />
@@ -307,7 +338,7 @@ export function LessonManagement() {
               Lessons must belong to a module inside a milestone.
             </p>
             <Button asChild className="mt-5 bg-[#14698d]">
-              <Link href="/course-management/modules">
+              <Link href={activeCourseId ? `/course-management/courses/${activeCourseId}/builder` : "/course-management/modules"}>
                 <Plus /> Create Module
               </Link>
             </Button>
@@ -442,18 +473,13 @@ export function LessonManagement() {
                     </label>
                     <label className="block text-sm">
                       <span className="flex items-center gap-2 font-bold">
-                        <Upload className="size-4" /> Or upload video (max 25 MB)
+                        <Upload className="size-4" /> Or upload a video file
                       </span>
                       <Input
                         accept="video/*"
                         className="mt-2"
                         onChange={(event) => {
                           selectVideo(event.target.files?.[0]);
-                          if (
-                            event.target.files?.[0] &&
-                            event.target.files[0].size > MAX_VIDEO_SIZE
-                          )
-                            event.target.value = "";
                         }}
                         type="file"
                       />

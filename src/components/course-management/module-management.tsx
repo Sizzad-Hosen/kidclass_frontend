@@ -53,7 +53,11 @@ export function ModuleManagement() {
   const [order, setOrder] = useState(1);
   const [editing, setEditing] = useState<CourseModule | null>(null);
 
-  const activeCourseId = selectedCourseId || courses[0]?._id || "";
+  const defaultCourseId =
+    courses.find((course) =>
+      milestones.some((milestone) => referenceId(milestone.course) === course._id),
+    )?._id ?? courses[0]?._id ?? "";
+  const activeCourseId = selectedCourseId || defaultCourseId;
   const courseMilestones = milestones
     .filter((milestone) => referenceId(milestone.course) === activeCourseId)
     .sort((a, b) => a.order - b.order);
@@ -179,6 +183,42 @@ export function ModuleManagement() {
           </Button>
         </div>
 
+        {courses.length ? (
+          <div className="mb-5 rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <label className="block flex-1 space-y-2">
+                <span className="text-sm font-black text-sky-800">1. Select course</span>
+                <select
+                  className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none focus:border-sky-500"
+                  onChange={(event) => changeCourse(event.target.value)}
+                  value={activeCourseId}
+                >
+                  {courses.map((course) => (
+                    <option key={course._id} value={course._id}>{course.title}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="block flex-1 space-y-2">
+                <span className="text-sm font-black text-violet-800">2. Select parent milestone</span>
+                <select
+                  className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none focus:border-violet-500 disabled:bg-slate-100"
+                  disabled={!courseMilestones.length}
+                  onChange={(event) => changeMilestone(event.target.value)}
+                  value={activeMilestoneId}
+                >
+                  {!courseMilestones.length ? <option value="">No milestone in this course</option> : null}
+                  {courseMilestones.map((milestone) => (
+                    <option key={milestone._id} value={milestone._id}>{milestone.order}. {milestone.title}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <p className="mt-3 text-sm text-slate-500">
+              Modules are created inside the selected milestone and remain attached to this course.
+            </p>
+          </div>
+        ) : null}
+
         {loading ? (
           <div className="grid gap-5 xl:grid-cols-[390px_1fr]">
             <Skeleton className="h-[560px] rounded-3xl" />
@@ -211,7 +251,7 @@ export function ModuleManagement() {
         ) : courseMilestones.length === 0 ? (
           <EmptyState
             description={`“${selectedCourse?.title}” has no milestones yet.`}
-            href="/course-management/milestones"
+            href={`/course-management/courses/${activeCourseId}/builder`}
             label="Create Milestone"
             title="Create a milestone first"
           />

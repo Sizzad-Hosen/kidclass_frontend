@@ -92,16 +92,10 @@ type EditTarget =
 const nextOrder = (items: Array<{ order: number }> | undefined) =>
   Math.max(0, ...(items?.map((item) => item.order) ?? [])) + 1;
 
-const MAX_VIDEO_SIZE = 25 * 1024 * 1024;
-
 const validVideoFile = (file: File | undefined) => {
   if (!file) return null;
   if (!file.type.startsWith("video/")) {
     toast.error("Choose a valid video file.");
-    return null;
-  }
-  if (file.size > MAX_VIDEO_SIZE) {
-    toast.error("Video files must be 25 MB or smaller.");
     return null;
   }
   return file;
@@ -796,7 +790,7 @@ function AddEntityDialog({
                     />
                   </label>
                   <label className="block rounded-xl border border-dashed border-sky-200 bg-sky-50/40 p-4 text-sm">
-                    <span className="font-bold">Or upload video (max 25 MB)</span>
+                    <span className="font-bold">Or upload a video file</span>
                     <Input
                       accept="video/*"
                       className="mt-2"
@@ -1017,7 +1011,7 @@ function EditEntityDialog({
               </label>
               <label className="block rounded-xl border border-dashed p-4 text-sm">
                 <span className="font-bold">
-                  Replace video (optional, max 25 MB)
+                  Replace video (optional)
                 </span>
                 <Input
                   accept="video/*"
