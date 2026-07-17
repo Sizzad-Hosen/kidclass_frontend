@@ -2,18 +2,13 @@ import { baseApi } from "@/redux/api/baseApi";
 import type { ApiResponse } from "@/redux/features/auth/types";
 
 export type DashboardOverview = {
-  totalStudents?: number;
-  students?: number;
-  totalCourses?: number;
-  courses?: number;
-  enrollments?: number;
-  totalEnrollments?: number;
-  revenue?: number;
-  activeSessions?: number;
-  activeStudents?: number;
-  growthRate?: number;
-  averageProgress?: number;
-  [key: string]: unknown;
+  users: { total: number; students: number; admins: number; superAdmins: number; active: number };
+  courses: { total: number; published: number; draft: number };
+  enrollments: { total: number; active: number; completed: number; cancelled: number };
+  content: { lessons: number; quizzes: number; assignments: number };
+  certificates: { issued: number };
+  assignments: { pendingReview: number };
+  revenue: { totalPaid: number };
 };
 
 export type DashboardMetadata = {

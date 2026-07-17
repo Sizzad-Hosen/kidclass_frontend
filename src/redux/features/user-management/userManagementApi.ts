@@ -11,6 +11,7 @@ export type ManagedUser = {
   grade?: string;
   avatar?: string;
   status?: "active" | "inactive" | "enrolled" | string;
+  isActive?: boolean;
   phone?: string;
   address?: string;
   parentName?: string;
@@ -40,6 +41,7 @@ export type UserListResponse = {
   total?: number;
   page?: number;
   limit?: number;
+  totalPages?: number;
 };
 
 export type CreateUserPayload = Partial<ManagedUser> & {
