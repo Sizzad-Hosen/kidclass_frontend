@@ -1,7 +1,5 @@
 "use client";
 
-import Image from "next/image";
-
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import {
   CourseCard,
@@ -13,16 +11,14 @@ import {
 import { BookOpen } from "@/components/kidclass/shared";
 import {
   getId,
-  useGetCoursesQuery,
   useGetMyEnrollmentsQuery,
 } from "@/redux/features/learning/learningApi";
 
 export default function StudentCoursesPage() {
-  const { data: courses, isLoading, isError } = useGetCoursesQuery();
   const {
     data: enrollments,
-    isLoading: isEnrollmentsLoading,
-    isError: isEnrollmentsError,
+    isLoading,
+    isError,
   } = useGetMyEnrollmentsQuery();
   const activeEnrollments = enrollments?.filter(
     (enrollment) => enrollment.status !== "cancelled" && enrollment.course,
@@ -37,48 +33,23 @@ export default function StudentCoursesPage() {
             Welcome back, Hero! Which adventure would you like to continue today?
           </p>
           <div className="mt-10">
-            {isLoading || isEnrollmentsLoading ? <CourseGridSkeleton /> : null}
-            {isError || isEnrollmentsError ? <ErrorState message="Could not load your courses." /> : null}
-            {!isLoading && !isEnrollmentsLoading && activeEnrollments?.length ? (
+            {isLoading ? <CourseGridSkeleton /> : null}
+            {isError ? <ErrorState message="Could not load your courses." /> : null}
+            {!isLoading && activeEnrollments?.length ? (
               <div className="grid gap-8 md:grid-cols-3">
-                {activeEnrollments.map((enrollment, index) => (
+                {activeEnrollments.map((enrollment) => (
                   <CourseCard
                     action="Continue Adventure"
                     course={enrollment.course!}
                     href={`/student/enrollments/${getId(enrollment)}`}
                     key={getId(enrollment)}
-                    progress={[65, 30, 85][index % 3]}
                   />
                 ))}
               </div>
             ) : null}
-            {!isLoading && !isEnrollmentsLoading && !activeEnrollments?.length && !courses?.length ? (
-              <EmptyState icon={<BookOpen />} title="No courses yet" message="Published courses will appear here." />
+            {!isLoading && !isError && !activeEnrollments?.length ? (
+              <EmptyState icon={<BookOpen />} title="No enrolled courses" message="Browse courses and enroll once to add a class here." />
             ) : null}
-            {!isLoading && !isEnrollmentsLoading && !activeEnrollments?.length && courses?.length ? (
-              <div className="grid gap-8 md:grid-cols-3">
-                {courses.map((course) => (
-                  <CourseCard
-                    action="Start Adventure"
-                    course={course}
-                    href={`/student/courses/${course._id ?? course.id}`}
-                    key={course._id ?? course.id}
-                  />
-                ))}
-              </div>
-            ) : null}
-          </div>
-          <div className="mt-16 flex items-center gap-4 rounded-[2rem] bg-blue-100 p-6 text-xl">
-            <Image
-              alt="Tip coach"
-              className="rounded-xl"
-              height={80}
-              src="/kidclass-mascot.png"
-              width={80}
-            />
-            <p>
-              <strong>Tip:</strong> Keep going, Explorer! Completing a course will earn you a shiny badge.
-            </p>
           </div>
         </main>
       </StudentLayout>

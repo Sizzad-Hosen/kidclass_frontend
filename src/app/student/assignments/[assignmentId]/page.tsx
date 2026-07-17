@@ -82,7 +82,7 @@ export default function AssignmentPage() {
         },
       }).unwrap();
       toast.success("Assignment submitted successfully!");
-      router.push("/student/enrollments");
+      router.push("/student/assignments");
     } catch {
       toast.error("Could not submit assignment.");
     }

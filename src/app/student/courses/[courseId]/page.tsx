@@ -16,24 +16,36 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  getId,
   useCreateEnrollmentMutation,
   useGetCourseStructureQuery,
+  useGetMyEnrollmentsQuery,
 } from "@/redux/features/learning/learningApi";
 
 export default function StudentCourseDetailsPage() {
   const params = useParams<{ courseId: string }>();
   const router = useRouter();
   const { data: structure, isLoading, isError } = useGetCourseStructureQuery(params.courseId);
+  const { data: enrollments } = useGetMyEnrollmentsQuery();
   const [enroll, { isLoading: isEnrolling }] = useCreateEnrollmentMutation();
   const course = structure?.course;
+  const existingEnrollment = enrollments?.find(
+    (item) => getId(item.course) === params.courseId && item.status !== "cancelled",
+  );
 
   const handleEnroll = async () => {
+    if (existingEnrollment) {
+      toast.info(`Already enrolled. Enrollment ID: ${getId(existingEnrollment)}`);
+      router.push(`/student/enrollments/${getId(existingEnrollment)}`);
+      return;
+    }
     try {
-      await enroll({ course: params.courseId }).unwrap();
-      toast.success("You enrolled successfully!");
-      router.push("/student/enrollments");
-    } catch {
-      toast.error("Enrollment failed. Please try again.");
+      const created = await enroll({ course: params.courseId }).unwrap();
+      toast.success(`Enrolled successfully. Enrollment ID: ${getId(created)}`);
+      router.push(`/student/enrollments/${getId(created)}`);
+    } catch (error) {
+      const message = (error as { data?: { message?: string } })?.data?.message;
+      toast.error(message ?? "Enrollment failed. Please try again.");
     }
   };
 
@@ -51,7 +63,7 @@ export default function StudentCourseDetailsPage() {
                 <p className="mt-4 max-w-3xl text-xl text-sky-50">{course.description}</p>
                 <div className="mt-8 flex gap-4">
                   <Button className="h-13 rounded-full bg-yellow-300 px-8 text-lg text-yellow-950" disabled={isEnrolling} onClick={handleEnroll}>
-                    {isEnrolling ? "Enrolling..." : "Enroll Now"}
+                    {isEnrolling ? "Enrolling..." : existingEnrollment ? "Continue Class" : "Enroll Now"}
                   </Button>
                   <Button asChild className="h-13 rounded-full bg-white/15 px-8 text-lg text-white">
                     <Link href="/student/courses">Back to Courses</Link>

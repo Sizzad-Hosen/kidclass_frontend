@@ -41,6 +41,17 @@ export type Assignment = {
   questions?: AssignmentQuestion[];
   points?: number;
   dueDate?: string;
+  submission?: AssignmentSubmission | null;
+};
+
+export type AssignmentSubmission = {
+  _id?: Id;
+  id?: Id;
+  score?: number;
+  totalPoints?: number;
+  passed?: boolean;
+  submittedAt?: string;
+  gradedAt?: string;
 };
 
 export type AssignmentQuestion = {
@@ -114,6 +125,11 @@ export type CourseProgress = {
     passed?: boolean;
     scorePercentage?: number | null;
   };
+};
+
+export type StudentLearningSummary = {
+  enrolledCourses: number;
+  completedLessons: number;
 };
 
 export type Certificate = {
@@ -198,6 +214,11 @@ export const learningApi = baseApi.injectEndpoints({
       transformResponse: unwrap<CourseProgress>,
       providesTags: ["Progress"],
     }),
+    getStudentLearningSummary: builder.query<StudentLearningSummary, void>({
+      query: () => "/progress/me/summary",
+      transformResponse: unwrap<StudentLearningSummary>,
+      providesTags: ["Progress"],
+    }),
     getLesson: builder.query<Lesson, Id>({
       query: (lessonId) => `/lessons/${lessonId}`,
       transformResponse: unwrap<Lesson>,
@@ -217,6 +238,11 @@ export const learningApi = baseApi.injectEndpoints({
     getAssignment: builder.query<Assignment, Id>({
       query: (assignmentId) => `/assignments/${assignmentId}`,
       transformResponse: unwrap<Assignment>,
+    }),
+    getMyAssignments: builder.query<Assignment[], void>({
+      query: () => "/assignments/me",
+      transformResponse: unwrap<Assignment[]>,
+      providesTags: ["Assignments"],
     }),
     submitAssignment: builder.mutation<
       unknown,
@@ -247,7 +273,7 @@ export const learningApi = baseApi.injectEndpoints({
         };
       },
       transformResponse: unwrap<unknown>,
-      invalidatesTags: ["Progress", "Certificates"],
+      invalidatesTags: ["Progress", "Certificates", "Assignments"],
     }),
     getCertificates: builder.query<Certificate[], void>({
       query: () => "/certificates",
@@ -273,9 +299,11 @@ export const {
   useGetCourseStructureQuery,
   useGetEnrollmentQuery,
   useGetLessonQuery,
+  useGetMyAssignmentsQuery,
   useGetMyEnrollmentsQuery,
   useGetProgressByCourseQuery,
   useGetProgressByEnrollmentQuery,
+  useGetStudentLearningSummaryQuery,
   useSubmitAssignmentMutation,
   useUpdateLessonProgressMutation,
   useVerifyCertificateQuery,

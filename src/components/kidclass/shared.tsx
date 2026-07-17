@@ -3,10 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSyncExternalStore } from "react";
 import {
   Award,
   BadgeCheck,
-  BarChart3,
   BookOpen,
   CalendarCheck,
   CheckCircle2,
@@ -16,6 +16,7 @@ import {
   HelpCircle,
   LayoutDashboard,
   Loader2,
+  LogOut,
   Lock,
   MapIcon,
   Menu,
@@ -35,6 +36,7 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useAppSelector } from "@/redux/hooks";
+import { useLogout } from "@/redux/features/auth/useLogout";
 import type {
   Assignment,
   Course,
@@ -47,7 +49,7 @@ import type {
 } from "@/redux/features/learning/learningApi";
 import { getId } from "@/redux/features/learning/learningApi";
 
-export const brandName = "EduAdventure";
+export const brandName = "Kidclass";
 
 export const kidColors = {
   blue: "#006DB3",
@@ -65,24 +67,30 @@ export function mascotImage(course?: Course) {
 
 export function PublicNavbar() {
   const user = useAppSelector((state) => state.auth.user);
+  const mounted = useSyncExternalStore(
+    () => () => undefined,
+    () => true,
+    () => false,
+  );
+
+  const isStudent = mounted && user?.role === "student";
 
   return (
-    <header className="border-b-4 border-sky-100 bg-slate-50/95">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
-        <Link className="flex items-center gap-3 text-2xl font-black text-sky-700" href="/">
-          <GraduationCap className="size-8 text-yellow-400" />
+    <header className="border-b border-[#c7d8e8] bg-[#f7f8fc]/95">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3 lg:px-10">
+        <Link className="flex items-center gap-2 text-xl font-bold text-[#0059a8]" href="/">
+          <GraduationCap className="size-6 text-[#ffd83d]" />
           {brandName}
         </Link>
-        <nav className="hidden items-center gap-8 text-lg font-semibold text-slate-700 md:flex">
-          <Link className="border-b-4 border-yellow-700 text-sky-700" href="/courses">
+        <nav className="hidden items-center gap-9 text-xs font-bold text-slate-800 md:flex">
+          <Link className="border-b-2 border-[#817000] pb-1 text-[#0059a8]" href="/courses">
             Lessons
           </Link>
-          <span>Games</span>
-          <span>Prizes</span>
+          <Link href="/games">Games</Link>
         </nav>
-        <Button asChild className="h-10 rounded-full bg-sky-700 px-6 text-base shadow-md" size="lg">
-          <Link href={user?.role === "student" ? "/student/dashboard" : "/login"}>
-            {user?.role === "student" ? "Dashboard" : "Sign In"}
+        <Button asChild className="h-9 rounded-full bg-[#006db3] px-6 text-xs font-bold shadow-md hover:bg-[#005b97]">
+          <Link href={isStudent ? "/student/dashboard" : "/login"}>
+            {isStudent ? "Dashboard" : "Sign In"}
           </Link>
         </Button>
       </div>
@@ -92,13 +100,19 @@ export function PublicNavbar() {
 
 export function PublicFooter() {
   return (
-    <footer className="border-t bg-slate-200/70">
-      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-10 text-slate-600 md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="text-xl font-bold text-sky-700">{brandName}</p>
+    <footer className="border-t border-slate-300 bg-[#e1e3ec]">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-9 text-slate-600 md:flex-row md:items-center md:justify-between lg:px-10">
+        <div className="[&>p:last-child]:hidden">
+          <p className="flex items-center gap-2 text-sm font-bold text-[#0059a8]">
+            <GraduationCap className="size-4 text-[#ffd83d]" />
+            {brandName}
+          </p>
+          <p className="mt-4 text-xs">
+            (c) 2024 EduAdventure Playground. Safe & Secure for Kids.
+          </p>
           <p className="mt-2">© 2024 EduAdventure Playground. Safe & Secure for Kids.</p>
         </div>
-        <div className="flex flex-wrap gap-6 text-sm underline">
+        <div className="flex flex-wrap gap-6 text-xs underline">
           <Link href="#">Privacy Policy</Link>
           <Link href="#">Safety Center</Link>
           <Link href="#">For Teachers</Link>
@@ -124,11 +138,15 @@ export function CourseCard({
   href,
   action = "View Course",
   progress,
+  onAction,
+  actionDisabled = false,
 }: {
   course: Course;
   href: string;
   action?: string;
   progress?: number;
+  onAction?: () => void;
+  actionDisabled?: boolean;
 }) {
   return (
     <Card className="rounded-[2rem] border-sky-100 bg-white p-3 shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
@@ -161,9 +179,20 @@ export function CourseCard({
             <Progress value={progress} />
           </div>
         ) : null}
-        <Button asChild className="h-11 w-full rounded-full bg-sky-700 text-base shadow-md">
-          <Link href={href}>{action}</Link>
-        </Button>
+        {onAction ? (
+          <div className="grid grid-cols-2 gap-3">
+            <Button asChild className="h-11 rounded-full border-sky-200 bg-white text-sky-700 shadow-sm hover:bg-sky-50">
+              <Link href={href}>View Details</Link>
+            </Button>
+            <Button className="h-11 rounded-full bg-sky-700 text-base shadow-md" disabled={actionDisabled} onClick={onAction}>
+              {action}
+            </Button>
+          </div>
+        ) : (
+          <Button asChild className="h-11 w-full rounded-full bg-sky-700 text-base shadow-md">
+            <Link href={href}>{action}</Link>
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
@@ -363,12 +392,13 @@ export function CourseGridSkeleton() {
 
 export function StudentSidebar() {
   const pathname = usePathname();
+  const { logout, isLoading } = useLogout();
   const links = [
     { href: "/student/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/student/courses", label: "My Courses", icon: BookOpen },
-    { href: "/student/enrollments", label: "My Progress", icon: BarChart3 },
-    { href: "/student/enrollments", label: "Badges", icon: Trophy },
-    { href: "/courses", label: "Fun Learning", icon: Sparkles },
+    { href: "/student/courses", label: "Courses", icon: BookOpen },
+    { href: "/student/assignments", label: "Assignments", icon: CalendarCheck },
+    { href: "/student/certificates", label: "Certificates", icon: Award },
+    { href: "/games", label: "Games", icon: Sparkles },
     { href: "/profile/me", label: "Profile", icon: UserRound },
   ];
 
@@ -397,17 +427,16 @@ export function StudentSidebar() {
           );
         })}
       </nav>
-      <Button asChild className="mt-20 h-14 w-full rounded-full bg-yellow-700 text-lg shadow-md">
-        <Link href="/student/enrollments">
-          <Rocket className="size-5" />
-          Daily Quest
-        </Link>
+      <Button className="mt-20 h-14 w-full rounded-full bg-red-600 text-lg shadow-md hover:bg-red-700" disabled={isLoading} onClick={logout}>
+        <LogOut className="size-5" />
+        {isLoading ? "Signing Out..." : "Logout"}
       </Button>
     </aside>
   );
 }
 
 export function DashboardHeader() {
+  const { logout, isLoading } = useLogout();
   return (
     <header className="sticky top-0 z-20 border-b-4 border-sky-100 bg-slate-50/95 px-5 py-4 backdrop-blur">
       <div className="flex items-center justify-between">
@@ -418,10 +447,10 @@ export function DashboardHeader() {
           <Link className="border-b-4 border-yellow-700 text-sky-700" href="/student/courses">
             Lessons
           </Link>
-          <span>Games</span>
+          <Link href="/games">Games</Link>
         </nav>
-        <Button asChild className="h-11 rounded-full bg-sky-700 px-6 text-base shadow-md">
-          <Link href="/login">Sign In</Link>
+        <Button className="h-11 rounded-full bg-sky-700 px-6 text-base shadow-md" disabled={isLoading} onClick={logout}>
+          <LogOut className="size-4" /> {isLoading ? "Signing Out..." : "Logout"}
         </Button>
         <Button className="lg:hidden" size="icon" variant="ghost" aria-label="Open menu">
           <Menu />

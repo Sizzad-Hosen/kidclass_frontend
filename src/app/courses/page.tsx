@@ -1,6 +1,8 @@
 "use client";
 
 import { BookOpen } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import {
   CourseCard,
@@ -10,10 +12,52 @@ import {
   PageShell,
 } from "@/components/kidclass/shared";
 import { Badge } from "@/components/ui/badge";
-import { useGetCoursesQuery } from "@/redux/features/learning/learningApi";
+import {
+  getId,
+  useCreateEnrollmentMutation,
+  useGetCoursesQuery,
+  useGetMyEnrollmentsQuery,
+} from "@/redux/features/learning/learningApi";
+import { useAppSelector } from "@/redux/hooks";
 
 export default function CoursesPage() {
+  const router = useRouter();
+  const user = useAppSelector((state) => state.auth.user);
   const { data: courses, isLoading, isError } = useGetCoursesQuery();
+  const { data: enrollments } = useGetMyEnrollmentsQuery(undefined, {
+    skip: user?.role !== "student",
+  });
+  const [enroll, enrollState] = useCreateEnrollmentMutation();
+
+  const enrollmentFor = (courseId: string) =>
+    enrollments?.find(
+      (item) => getId(item.course) === courseId && item.status !== "cancelled",
+    );
+
+  const enrollCourse = async (courseId: string) => {
+    if (!user) {
+      router.push(`/login?redirect=${encodeURIComponent("/courses")}`);
+      return;
+    }
+    if (user.role !== "student") {
+      toast.error("Only student accounts can enroll in courses.");
+      return;
+    }
+    const existing = enrollmentFor(courseId);
+    if (existing) {
+      toast.info(`Already enrolled. Enrollment ID: ${getId(existing)}`);
+      router.push(`/student/enrollments/${getId(existing)}`);
+      return;
+    }
+    try {
+      const created = await enroll({ course: courseId }).unwrap();
+      toast.success(`Enrolled successfully. Enrollment ID: ${getId(created)}`);
+      router.push(`/student/enrollments/${getId(created)}`);
+    } catch (error) {
+      const message = (error as { data?: { message?: string } })?.data?.message;
+      toast.error(message ?? "Could not enroll in this course.");
+    }
+  };
 
   return (
     <PageShell>
@@ -31,9 +75,20 @@ export default function CoursesPage() {
           ) : null}
           {courses?.length ? (
             <div className="grid gap-6 md:grid-cols-3">
-              {courses.map((course) => (
-                <CourseCard course={course} href={`/courses/${course._id ?? course.id}`} key={course._id ?? course.id} action="View Course" />
-              ))}
+              {courses.map((course) => {
+                const courseId = getId(course);
+                const existing = enrollmentFor(courseId);
+                return (
+                  <CourseCard
+                    action={existing ? "Continue Class" : "Enroll Now"}
+                    actionDisabled={enrollState.isLoading}
+                    course={course}
+                    href={`/courses/${courseId}`}
+                    key={courseId}
+                    onAction={() => enrollCourse(courseId)}
+                  />
+                );
+              })}
             </div>
           ) : null}
         </div>

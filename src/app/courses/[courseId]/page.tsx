@@ -18,10 +18,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { PublicCoursePlayer } from "@/components/course-management/public-course-player";
 import { Progress } from "@/components/ui/progress";
 import {
+  getId,
   useCreateEnrollmentMutation,
   useGetCourseStructureQuery,
+  useGetMyEnrollmentsQuery,
 } from "@/redux/features/learning/learningApi";
 import { useAppSelector } from "@/redux/hooks";
 
@@ -30,8 +33,14 @@ export default function CourseDetailsPage() {
   const router = useRouter();
   const user = useAppSelector((state) => state.auth.user);
   const { data: structure, isLoading, isError } = useGetCourseStructureQuery(params.courseId);
+  const { data: enrollments } = useGetMyEnrollmentsQuery(undefined, {
+    skip: user?.role !== "student",
+  });
   const [enroll, { isLoading: isEnrolling }] = useCreateEnrollmentMutation();
   const course = structure?.course;
+  const existingEnrollment = enrollments?.find(
+    (item) => getId(item.course) === params.courseId && item.status !== "cancelled",
+  );
 
   const handleEnroll = async () => {
     if (!user) {
@@ -44,12 +53,19 @@ export default function CourseDetailsPage() {
       return;
     }
 
+    if (existingEnrollment) {
+      toast.info(`Already enrolled. Enrollment ID: ${getId(existingEnrollment)}`);
+      router.push(`/student/enrollments/${getId(existingEnrollment)}`);
+      return;
+    }
+
     try {
-      await enroll({ course: params.courseId }).unwrap();
-      toast.success("Enrollment started. Welcome to the adventure!");
-      router.push("/student/enrollments");
-    } catch {
-      toast.error("Could not enroll right now.");
+      const created = await enroll({ course: params.courseId }).unwrap();
+      toast.success(`Enrolled successfully. Enrollment ID: ${getId(created)}`);
+      router.push(`/student/enrollments/${getId(created)}`);
+    } catch (error) {
+      const message = (error as { data?: { message?: string } })?.data?.message;
+      toast.error(message ?? "Could not enroll right now.");
     }
   };
 
@@ -71,7 +87,7 @@ export default function CourseDetailsPage() {
             <p className="mt-5 max-w-2xl text-xl leading-8 text-sky-50">{course.description}</p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Button className="h-14 rounded-full bg-yellow-300 px-8 text-lg text-yellow-950 shadow-md" disabled={isEnrolling} onClick={handleEnroll}>
-                {isEnrolling ? "Enrolling..." : "Enroll Now"}
+                {isEnrolling ? "Enrolling..." : existingEnrollment ? "Continue Class" : "Enroll Now"}
               </Button>
               <Button asChild className="h-14 rounded-full border-white/40 bg-white/10 px-8 text-lg text-white hover:bg-white/20">
                 <Link href="/courses">Try Another Course</Link>
@@ -81,6 +97,10 @@ export default function CourseDetailsPage() {
           <div className="relative aspect-square overflow-hidden rounded-sm bg-yellow-100">
             <Image alt={course.title} className="object-cover" fill src={mascotImage(course)} unoptimized />
           </div>
+        </div>
+
+        <div className="mt-10">
+          <PublicCoursePlayer structure={structure} />
         </div>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_360px]">
@@ -126,14 +146,14 @@ export default function CourseDetailsPage() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="rounded-[2rem] border-yellow-700 bg-yellow-300 p-6 text-center shadow-lg">
+            <Card className="rounded-[2rem] border-sky-200 bg-sky-50 p-6 text-center shadow-lg">
               <CardContent>
-                <p className="text-yellow-800">Unlock the Full Adventure!</p>
-                <p className="my-4 text-4xl font-black text-yellow-950">
-                  {course.price ? `$${course.price}` : "Free"}
+                <p className="text-sky-800">{existingEnrollment ? "Your class is ready" : "Unlock the full learning journey"}</p>
+                <p className="my-4 text-2xl font-black text-sky-950">
+                  {existingEnrollment ? "Continue where you left off" : "Enroll once and learn anytime"}
                 </p>
                 <Button className="h-12 w-full rounded-full bg-sky-700 text-base" onClick={handleEnroll}>
-                  Enroll Now
+                  {existingEnrollment ? "Continue Class" : "Enroll Now"}
                 </Button>
               </CardContent>
             </Card>

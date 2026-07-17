@@ -3,18 +3,17 @@
 import { useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { AlertTriangle, Map } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import {
   ErrorState,
   PageLoader,
   StudentLayout,
-  StructurePreview,
 } from "@/components/kidclass/shared";
+import { PublicCoursePlayer } from "@/components/course-management/public-course-player";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +25,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import {
   getId,
+  type Lesson,
   useCancelEnrollmentMutation,
   useGetCourseStructureQuery,
   useGetEnrollmentQuery,
@@ -42,16 +42,22 @@ export default function EnrollmentDetailsPage() {
   const { data: progress } = useGetProgressByEnrollmentQuery(params.enrollmentId);
   const [cancelEnrollment, { isLoading: isCancelling }] = useCancelEnrollmentMutation();
 
-  const completion = progress?.completionPercentage ?? (enrollment?.status === "completed" ? 100 : 45);
+  const completion = progress?.completionPercentage ?? (enrollment?.status === "completed" ? 100 : 0);
   const nextLesson = useMemo(() => {
+    const lessonStatuses = new Map(
+      progress?.lessons?.progress?.map((item) => [getId(item.lesson), item.status]) ?? [],
+    );
+    let firstLesson: Lesson | undefined;
     for (const milestone of structure?.milestones ?? []) {
       for (const moduleItem of milestone.modules ?? []) {
-        const lesson = moduleItem.lessons?.[0];
-        if (lesson) return lesson;
+        for (const lesson of moduleItem.lessons ?? []) {
+          firstLesson ??= lesson;
+          if (lessonStatuses.get(getId(lesson)) !== "completed") return lesson;
+        }
       }
     }
-    return undefined;
-  }, [structure]);
+    return firstLesson;
+  }, [progress?.lessons?.progress, structure]);
 
   const handleCancel = async () => {
     try {
@@ -99,15 +105,9 @@ export default function EnrollmentDetailsPage() {
                 </div>
               </section>
 
-              <Card className="rounded-[2rem] bg-white p-6">
-                <CardContent>
-                  <h2 className="mb-6 flex items-center gap-3 text-3xl font-black text-sky-700">
-                    <Map />
-                    Course Structure
-                  </h2>
-                  <StructurePreview progress={progress} structure={structure} studentMode />
-                </CardContent>
-              </Card>
+              {structure ? (
+                <PublicCoursePlayer progress={progress} structure={structure} studentMode />
+              ) : null}
             </div>
           ) : null}
         </main>

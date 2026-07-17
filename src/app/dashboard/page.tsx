@@ -1,5 +1,5 @@
 import { AdminDashboard } from "@/components/kidclass/admin-dashboard";
 
-export default function AdminDashboardPage() {
+export default function DashboardPage() {
   return <AdminDashboard />;
 }
