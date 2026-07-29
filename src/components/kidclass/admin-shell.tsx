@@ -161,13 +161,13 @@ export function AdminShell({ children }: AdminShellProps) {
                 <Bell className="size-6" />
                 <span className="absolute -right-1 -top-1 size-2.5 rounded-full bg-red-600" />
               </button>
-              <button
+              <Link
                 className="text-slate-700"
-                type="button"
                 aria-label="Settings"
+                href="/settings"
               >
                 <Settings className="size-7" />
-              </button>
+              </Link>
               <span className="hidden h-11 w-px bg-slate-300 md:block" />
               <div className="hidden text-right md:block">
                 <p className="font-bold">{user?.name ?? "Admin User"}</p>

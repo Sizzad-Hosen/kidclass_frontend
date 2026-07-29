@@ -1,17 +1,26 @@
 "use client";
 
-import Link from "next/link";
-import { useDeferredValue, useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Edit3, Search, Trash2, UsersRound } from "lucide-react";
+import { useDeferredValue, useState, type FormEvent } from "react";
+import { ChevronLeft, ChevronRight, Edit3, Loader2, Search, Trash2, UsersRound } from "lucide-react";
 import { toast } from "sonner";
 
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { AdminCard, AdminShell } from "@/components/kidclass/admin-shell";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
   type ManagedUser,
   useDeleteUserMutation,
   useGetUsersQuery,
+  useUpdateUserMutation,
 } from "@/redux/features/user-management/userManagementApi";
 
 const PAGE_SIZE = 10;
@@ -22,6 +31,8 @@ export default function UserManagementPage() {
   const [role, setRole] = useState("");
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
+  const [editingUser, setEditingUser] = useState<ManagedUser | null>(null);
+  const [deletingUser, setDeletingUser] = useState<ManagedUser | null>(null);
   const { data, isLoading, isError } = useGetUsersQuery({
     search: deferredSearch || undefined,
     role: role || undefined,
@@ -30,22 +41,47 @@ export default function UserManagementPage() {
     limit: PAGE_SIZE,
   });
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
+  const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
   const users = data?.users ?? [];
   const total = data?.total ?? 0;
   const totalPages = data?.totalPages ?? Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-  useEffect(() => setPage(1), [deferredSearch, role, status]);
-  useEffect(() => {
-    if (page > totalPages) setPage(totalPages);
-  }, [page, totalPages]);
+  const handleEdit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!editingUser) return;
 
-  const handleDelete = async (user: ManagedUser) => {
-    const userId = getUserId(user);
+    const userId = getUserId(editingUser);
     if (!userId) return toast.error("Missing user id.");
-    if (!window.confirm(`Delete ${user.name ?? "this user"}?`)) return;
+
+    const form = new FormData(event.currentTarget);
+    const name = String(form.get("name") ?? "").trim();
+    const email = String(form.get("email") ?? "").trim();
+    const role = String(form.get("role") ?? "student");
+    const isActive = form.get("status") === "active";
+
+    if (!name || !email) {
+      toast.error("Name and email are required.");
+      return;
+    }
+
+    try {
+      await updateUser({ userId, body: { name, email, role, isActive } }).unwrap();
+      setEditingUser(null);
+      toast.success("User updated successfully.");
+    } catch {
+      toast.error("Could not update user.");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deletingUser) return;
+    const userId = getUserId(deletingUser);
+    if (!userId) return toast.error("Missing user id.");
 
     try {
       await deleteUser(userId).unwrap();
+      if (users.length === 1 && page > 1) setPage((current) => current - 1);
+      setDeletingUser(null);
       toast.success("User deleted successfully.");
     } catch {
       toast.error("Could not delete user.");
@@ -69,16 +105,16 @@ export default function UserManagementPage() {
               <span className="mb-2 block text-sm font-bold">Search users</span>
               <div className="flex h-12 items-center gap-3 rounded-xl border border-slate-300 px-4">
                 <Search className="size-5 text-slate-400" />
-                <input className="h-full min-w-0 flex-1 bg-transparent outline-none" onChange={(event) => setSearch(event.target.value)} placeholder="Name or email..." value={search} />
+                <input className="h-full min-w-0 flex-1 bg-transparent outline-none" onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder="Name or email..." value={search} />
               </div>
             </label>
-            <FilterSelect label="Role" onChange={setRole} value={role}>
+            <FilterSelect label="Role" onChange={(value) => { setRole(value); setPage(1); }} value={role}>
               <option value="">All roles</option>
               <option value="student">Student</option>
               <option value="admin">Admin</option>
               <option value="super_admin">Super admin</option>
             </FilterSelect>
-            <FilterSelect label="Status" onChange={setStatus} value={status}>
+            <FilterSelect label="Status" onChange={(value) => { setStatus(value); setPage(1); }} value={status}>
               <option value="">All statuses</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
@@ -103,10 +139,10 @@ export default function UserManagementPage() {
                   return (
                     <tr className="border-t border-slate-100" key={userId || user.email}>
                       <td className="px-6 py-4">
-                        <Link className="flex items-center gap-3 font-semibold hover:text-[#14698d]" href={`/user-management/${userId}`}>
+                        <div className="flex items-center gap-3 font-semibold">
                           <Avatar user={user} />
                           <span>{user.name ?? "Unnamed User"}</span>
-                        </Link>
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-slate-600">{user.email ?? "—"}</td>
                       <td className="px-6 py-4"><span className="rounded-full bg-sky-50 px-3 py-1 text-sm font-bold capitalize text-sky-700">{String(user.role ?? "unknown").replace("_", " ")}</span></td>
@@ -114,8 +150,8 @@ export default function UserManagementPage() {
                       <td className="px-6 py-4"><StatusBadge active={user.isActive !== false} /></td>
                       <td className="px-6 py-4">
                         <div className="flex justify-end gap-3 text-slate-600">
-                          <Link aria-label="Edit user" href={`/user-management/${userId}`}><Edit3 className="size-5" /></Link>
-                          <button aria-label="Delete user" disabled={isDeleting} onClick={() => handleDelete(user)} type="button"><Trash2 className="size-5" /></button>
+                          <button aria-label={`Edit ${user.name ?? "user"}`} className="rounded-md p-1 transition hover:bg-sky-50 hover:text-[#14698d]" onClick={() => setEditingUser(user)} type="button"><Edit3 className="size-5" /></button>
+                          <button aria-label={`Delete ${user.name ?? "user"}`} className="rounded-md p-1 transition hover:bg-red-50 hover:text-red-600" onClick={() => setDeletingUser(user)} type="button"><Trash2 className="size-5" /></button>
                         </div>
                       </td>
                     </tr>
@@ -143,9 +179,72 @@ export default function UserManagementPage() {
             </div>
           ) : null}
         </AdminCard>
+
+        <Dialog open={Boolean(editingUser)} onOpenChange={(open) => !open && setEditingUser(null)}>
+          <DialogContent className="max-w-lg" onClose={() => setEditingUser(null)}>
+            <form key={getUserId(editingUser ?? {})} onSubmit={handleEdit}>
+              <DialogHeader>
+                <DialogTitle>Edit user</DialogTitle>
+                <DialogDescription>Update this user&apos;s account details and access.</DialogDescription>
+              </DialogHeader>
+
+              <div className="mt-6 grid gap-4">
+                <ModalField label="Name">
+                  <Input className="h-11" defaultValue={editingUser?.name ?? ""} name="name" placeholder="Full name" required />
+                </ModalField>
+                <ModalField label="Email">
+                  <Input className="h-11" defaultValue={editingUser?.email ?? ""} name="email" placeholder="Email address" required type="email" />
+                </ModalField>
+                <ModalField label="Role">
+                  <select className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 outline-none focus:border-[#14698d]" defaultValue={String(editingUser?.role ?? "student")} name="role">
+                    <option value="student">Student</option>
+                    <option value="admin">Admin</option>
+                    <option value="super_admin">Super admin</option>
+                  </select>
+                </ModalField>
+                <ModalField label="Status">
+                  <select className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 outline-none focus:border-[#14698d]" defaultValue={editingUser?.isActive === false ? "inactive" : "active"} name="status">
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </ModalField>
+              </div>
+
+              <DialogFooter>
+                <Button disabled={isUpdating} onClick={() => setEditingUser(null)} type="button" variant="outline">Cancel</Button>
+                <Button className="bg-[#14698d] hover:bg-[#0d5877]" disabled={isUpdating} type="submit">
+                  {isUpdating ? <Loader2 className="animate-spin" /> : null}
+                  Save changes
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={Boolean(deletingUser)} onOpenChange={(open) => !open && setDeletingUser(null)}>
+          <DialogContent onClose={() => setDeletingUser(null)}>
+            <DialogHeader>
+              <DialogTitle>Delete user?</DialogTitle>
+              <DialogDescription>
+                This will permanently delete <strong>{deletingUser?.name ?? "this user"}</strong> and cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button disabled={isDeleting} onClick={() => setDeletingUser(null)} type="button" variant="outline">Cancel</Button>
+              <Button className="bg-red-600 text-white hover:bg-red-700" disabled={isDeleting} onClick={handleDelete} type="button">
+                {isDeleting ? <Loader2 className="animate-spin" /> : <Trash2 />}
+                Delete user
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </AdminShell>
     </ProtectedRoute>
   );
+}
+
+function ModalField({ children, label }: { children: React.ReactNode; label: string }) {
+  return <label><span className="mb-2 block text-sm font-bold text-slate-700">{label}</span>{children}</label>;
 }
 
 function FilterSelect({ children, label, onChange, value }: { children: React.ReactNode; label: string; onChange: (value: string) => void; value: string }) {

@@ -399,7 +399,7 @@ export function StudentSidebar() {
     { href: "/student/assignments", label: "Assignments", icon: CalendarCheck },
     { href: "/student/certificates", label: "Certificates", icon: Award },
     { href: "/games", label: "Games", icon: Sparkles },
-    { href: "/profile/me", label: "Profile", icon: UserRound },
+    { href: "/student/settings", label: "Settings", icon: UserRound },
   ];
 
   return (
