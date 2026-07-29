@@ -626,6 +626,10 @@ function AddEntityDialog({
   const [passingScore, setPassingScore] = useState(70);
   const [questions, setQuestions] = useState<QuizQuestion[]>([emptyQuestion()]);
   const busy = m1.isLoading || m2.isLoading || m3.isLoading || m4.isLoading;
+  const isQuiz =
+    open?.type === "quiz" ||
+    (open?.type === "lesson" && contentType === "quiz");
+  const entityType = isQuiz ? "quiz" : open?.type;
   const parentType =
     open?.type === "milestone"
       ? "Course"
@@ -637,7 +641,7 @@ function AddEntityDialog({
       ? Layers3
       : open?.type === "module"
         ? Blocks
-        : open?.type === "lesson"
+        : entityType === "lesson"
           ? FileVideo
           : CircleHelp;
   const submit = async (e: FormEvent) => {
@@ -658,7 +662,7 @@ function AddEntityDialog({
           title: title.trim(),
           order: entityOrder,
         }).unwrap();
-      else if (open.type === "quiz")
+      else if (isQuiz)
         result = await createQuiz({
           module: open.parentId,
           title: title.trim(),
@@ -685,10 +689,10 @@ function AddEntityDialog({
           contentNotes: notes.trim(),
           videoUrl: videoUrl || undefined,
         }).unwrap();
-      toast.success(`${open.type} created successfully.`);
+      toast.success(`${entityType} created successfully.`);
       onCreated(result._id);
     } catch (error) {
-      toast.error(getAuthErrorMessage(error, `Unable to create ${open.type}.`));
+      toast.error(getAuthErrorMessage(error, `Unable to create ${entityType}.`));
     }
   };
   return (
@@ -703,7 +707,7 @@ function AddEntityDialog({
               <EntityIcon className="size-5" />
             </span>
             <div>
-              <DialogTitle className="capitalize">Create {open?.type}</DialogTitle>
+              <DialogTitle className="capitalize">Create {entityType}</DialogTitle>
               <DialogDescription>
                 Complete the details below and save it to the curriculum.
               </DialogDescription>
@@ -718,7 +722,7 @@ function AddEntityDialog({
             <p className="mt-1 font-bold text-slate-800">{open?.parentName}</p>
           </div>
           <label className="space-y-2">
-            <span className="text-sm font-bold capitalize">{open?.type} title</span>
+            <span className="text-sm font-bold capitalize">{entityType} title</span>
             <Input
               minLength={1}
               onChange={(e) => setTitle(e.target.value)}
@@ -726,7 +730,7 @@ function AddEntityDialog({
               value={title}
             />
           </label>
-          {open?.type !== "quiz" ? (
+          {!isQuiz ? (
             <label className="space-y-2">
               <span className="text-sm font-bold">Order</span>
               <Input
@@ -737,7 +741,7 @@ function AddEntityDialog({
                 value={order || open?.nextOrder}
               />
               <span className="block text-xs font-normal text-slate-500">
-                Controls where this {open?.type} appears inside its parent.
+                Controls where this {entityType} appears inside its parent.
               </span>
             </label>
           ) : null}
@@ -756,11 +760,13 @@ function AddEntityDialog({
                   }}
                   value={contentType}
                 >
-                  {["video", "text", "pdf", "image"].map((v) => (
+                  {["video", "text", "pdf", "image", "quiz"].map((v) => (
                     <option key={v}>{v}</option>
                   ))}
                 </select>
               </label>
+              {!isQuiz ? (
+                <>
               <label className="space-y-2">
                 <span className="text-sm font-bold">Duration in seconds</span>
                 <Input
@@ -809,9 +815,11 @@ function AddEntityDialog({
                   </label>
                 </div>
               ) : null}
+                </>
+              ) : null}
             </>
           ) : null}
-          {open?.type === "quiz" ? (
+          {isQuiz ? (
             <>
               <label className="space-y-2">
                 <span className="text-sm font-bold">Passing score (%)</span>
@@ -831,9 +839,9 @@ function AddEntityDialog({
             <Button onClick={onClose} type="button" variant="outline">
               Cancel
             </Button>
-            <Button className="bg-[#14698d]" disabled={busy}>
+            <Button className="bg-[#14698d]" disabled={busy} type="submit">
               {busy && <Loader2 className="animate-spin" />}
-              Create <span className="capitalize">{open?.type}</span>
+              Create <span className="capitalize">{entityType}</span>
             </Button>
           </div>
         </form>
@@ -1051,7 +1059,7 @@ function EditEntityDialog({
             <Button onClick={onClose} type="button" variant="outline">
               Cancel
             </Button>
-            <Button className="bg-[#14698d]" disabled={busy}>
+            <Button className="bg-[#14698d]" disabled={busy} type="submit">
               {busy && <Loader2 className="animate-spin" />}Save Changes
             </Button>
           </div>

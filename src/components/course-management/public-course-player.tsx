@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { PublicQuizDialog } from "@/components/course-management/public-quiz-dialog";
 import type {
   CourseModule,
   CourseProgress,
@@ -97,6 +98,7 @@ export function PublicCoursePlayer({
   );
   const firstLessonId = getId(lessonEntries[0]?.lesson);
   const [selectedLessonId, setSelectedLessonId] = useState(firstLessonId);
+  const [selectedQuizId, setSelectedQuizId] = useState("");
   const [openMilestones, setOpenMilestones] = useState<Record<string, boolean>>(
     () => ({ [getId(structure.milestones[0])]: true }),
   );
@@ -288,13 +290,19 @@ export function PublicCoursePlayer({
                                   );
                                 })}
                                 {(moduleItem.quizzes ?? []).map((quiz) => (
-                                  <div className="flex items-center gap-3 rounded-xl px-3 py-3 text-slate-500" key={getId(quiz)}>
+                                  <button
+                                    className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-slate-600 transition hover:bg-amber-50 hover:text-amber-800"
+                                    key={getId(quiz)}
+                                    onClick={() => setSelectedQuizId(getId(quiz))}
+                                    type="button"
+                                  >
                                     <span className="grid size-9 place-items-center rounded-lg bg-amber-100 text-amber-700">
                                       <CircleHelp className="size-4" />
                                     </span>
                                     <span className="min-w-0 flex-1 truncate text-sm font-bold">{quiz.title ?? "Module quiz"}</span>
-                                    <LockKeyhole className="size-4 text-slate-300" />
-                                  </div>
+                                    <span className="text-xs font-black uppercase text-amber-700">Start</span>
+                                    <ChevronRight className="size-4" />
+                                  </button>
                                 ))}
                               </div>
                             ) : null}
@@ -347,8 +355,15 @@ export function PublicCoursePlayer({
 
       <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-500 sm:px-8">
         <span className="flex items-center gap-2"><CheckCircle2 className="size-4 text-emerald-500" /> {studentMode ? `${progress?.lessons?.completed ?? 0} lessons completed` : "Public course preview is ready"}</span>
-        <span>{totalQuizzes} quizzes unlock during the learning journey</span>
+        <span>{totalQuizzes} quizzes available to try</span>
       </footer>
+      {selectedQuizId ? (
+        <PublicQuizDialog
+          key={selectedQuizId}
+          onClose={() => setSelectedQuizId("")}
+          quizId={selectedQuizId}
+        />
+      ) : null}
     </section>
   );
 }

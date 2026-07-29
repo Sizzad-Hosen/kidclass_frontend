@@ -32,6 +32,26 @@ export type Quiz = {
   title?: string;
 };
 
+export type PublicQuiz = {
+  id?: Id;
+  title: string;
+  passingScore: number;
+  questions: Array<{
+    questionText: string;
+    points: number;
+    options: Array<{ text: string }>;
+  }>;
+};
+
+export type QuizSubmissionResult = {
+  score: number;
+  totalPoints: number;
+  scorePercentage: number;
+  passingScore: number;
+  passed: boolean;
+  correctOptionIndexes: number[];
+};
+
 export type Assignment = {
   _id?: Id;
   id?: Id;
@@ -242,6 +262,22 @@ export const learningApi = baseApi.injectEndpoints({
       transformResponse: unwrap<ProgressRecord>,
       invalidatesTags: ["Progress", "Enrollments"],
     }),
+    getPublicQuiz: builder.query<PublicQuiz, Id>({
+      query: (quizId) => `/quizzes/${quizId}/public`,
+      transformResponse: unwrap<PublicQuiz>,
+    }),
+    submitPublicQuiz: builder.mutation<
+      QuizSubmissionResult,
+      { quizId: Id; answers: number[] }
+    >({
+      query: ({ quizId, answers }) => ({
+        url: `/quizzes/${quizId}/submit`,
+        method: "POST",
+        body: { answers },
+      }),
+      transformResponse: unwrap<QuizSubmissionResult>,
+      invalidatesTags: ["Progress"],
+    }),
     getAssignment: builder.query<Assignment, Id>({
       query: (assignmentId) => `/assignments/${assignmentId}`,
       transformResponse: unwrap<Assignment>,
@@ -310,8 +346,10 @@ export const {
   useGetMyEnrollmentsQuery,
   useGetProgressByCourseQuery,
   useGetProgressByEnrollmentQuery,
+  useGetPublicQuizQuery,
   useGetStudentLearningSummaryQuery,
   useSubmitAssignmentMutation,
+  useSubmitPublicQuizMutation,
   useUpdateLessonProgressMutation,
   useVerifyCertificateQuery,
 } = learningApi;
