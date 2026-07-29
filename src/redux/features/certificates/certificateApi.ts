@@ -14,6 +14,8 @@ export type CertificateTemplatePayload = {
 export type CertificateTemplate = Omit<CertificateTemplatePayload, "course"> & {
   _id: string;
   course: Course | string;
+  isPublished?: boolean;
+  publishedAt?: string;
   createdAt?: string;
   updatedAt?: string;
 };

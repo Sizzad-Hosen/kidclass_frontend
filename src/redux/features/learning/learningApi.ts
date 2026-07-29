@@ -324,6 +324,12 @@ export const learningApi = baseApi.injectEndpoints({
         response.data.filter((certificate) => Boolean(certificate.enrollment)),
       providesTags: ["Certificates"],
     }),
+    downloadCertificate: builder.mutation<Blob, Id>({
+      query: (certificateId) => ({
+        url: `/certificates/download/${certificateId}`,
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
     verifyCertificate: builder.query<Certificate, Id>({
       query: (certificateNo) => `/certificates/verify/${certificateNo}`,
       transformResponse: unwrap<Certificate>,
@@ -334,6 +340,7 @@ export const learningApi = baseApi.injectEndpoints({
 export const {
   useCancelEnrollmentMutation,
   useCreateEnrollmentMutation,
+  useDownloadCertificateMutation,
   useGetAssignmentQuery,
   useGetCertificatesQuery,
   useGetCourseDetailsQuery,

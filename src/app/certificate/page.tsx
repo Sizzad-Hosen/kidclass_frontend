@@ -99,7 +99,7 @@ export default function CertificatePage() {
 
   const publish = async (template: CertificateTemplate) => {
     const course = courseOf(template);
-    if (!window.confirm(`Publish certificates to every 100% eligible student in ${course?.title ?? "this course"}?`)) return;
+    if (!window.confirm(`Publish this template for ${course?.title ?? "this course"} and issue certificates to students with at least 70% on the final assignment?`)) return;
     try {
       const result = await publishTemplate(template._id).unwrap();
       toast.success(
@@ -115,7 +115,7 @@ export default function CertificatePage() {
       <AdminShell>
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-[#0d6386]">Certificate Templates</h1>
-          <p className="mt-2 text-slate-600">Create a class and subject certificate, then publish it only to students who completed 100% of the selected course.</p>
+          <p className="mt-2 text-slate-600">Create one course-wise template and publish it. Students automatically receive a certificate after earning at least 70% on the final assignment.</p>
         </div>
 
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(420px,.8fr)]">
@@ -156,11 +156,11 @@ export default function CertificatePage() {
               return <AdminCard className="p-6" key={template._id}>
                 <div className="flex items-start justify-between gap-4">
                   <div><Award className="size-9 text-amber-500" /><h3 className="mt-3 text-xl font-bold">{template.title}</h3><p className="mt-1 text-sm text-slate-500">{course?.title ?? "Course"} · {template.className} · {template.subject}</p></div>
-                  <span className={`rounded-full px-3 py-1 text-xs font-bold ${course?.isPublished ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>{course?.isPublished ? "Course published" : "Course draft"}</span>
+                  <span className={`rounded-full px-3 py-1 text-xs font-bold ${template.isPublished ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>{template.isPublished ? "Active template" : course?.isPublished ? "Ready to publish" : "Course draft"}</span>
                 </div>
                 <div className="mt-5 rounded-xl bg-slate-50 p-4 text-sm"><p className="font-bold">{template.issuerName}</p><p className="mt-1 flex items-center gap-2 text-slate-500"><Mail className="size-4" />{template.issuerEmail}</p></div>
                 <div className="mt-5 flex flex-wrap gap-2">
-                  <Button className="bg-emerald-700" disabled={!course?.isPublished || isPublishing} onClick={() => publish(template)}><Send /> Publish to 100% complete</Button>
+                  <Button className="bg-emerald-700" disabled={!course?.isPublished || isPublishing || template.isPublished} onClick={() => publish(template)}><Send /> {template.isPublished ? "Published" : "Publish & Auto-Issue"}</Button>
                   <Button onClick={() => edit(template)} variant="outline"><Edit3 /> Edit</Button>
                   <Button className="text-red-700" onClick={() => remove(template._id)} variant="outline"><Trash2 /> Delete</Button>
                 </div>
@@ -184,7 +184,7 @@ function CertificatePreview({ form, course }: { form: CertificateTemplatePayload
     <h2 className="mt-4 font-serif text-3xl font-bold">{form.title || "Certificate of Completion"}</h2>
     <p className="mt-7 text-slate-500">This certificate is proudly presented to</p>
     <p className="mt-2 border-b border-slate-400 pb-2 font-serif text-3xl font-bold text-[#0d6386]">Student Name</p>
-    <p className="mt-5 text-slate-600">for completing 100% of <strong>{course?.title || "Selected Course"}</strong></p>
+    <p className="mt-5 text-slate-600">for passing the final assignment of <strong>{course?.title || "Selected Course"}</strong> with at least 70%</p>
     <p className="mt-2 font-bold">{form.className || "Class"} · {form.subject || "Subject"}</p>
     <div className="mx-auto mt-10 max-w-xs border-t border-slate-400 pt-3"><p className="font-bold">{form.issuerName || "Issuer Name"}</p><p className="text-xs text-slate-400">{form.issuerEmail || "Email"}</p></div>
   </AdminCard>;
