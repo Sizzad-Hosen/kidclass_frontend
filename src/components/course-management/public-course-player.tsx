@@ -23,6 +23,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { PublicQuizDialog } from "@/components/course-management/public-quiz-dialog";
+import { VideoPlayer } from "@/components/kidclass/video-player";
 import type {
   CourseModule,
   CourseProgress,
@@ -458,9 +459,7 @@ function LessonContent({ lesson }: { lesson: Lesson }) {
     if (lesson.videoUrl) {
       return (
         <div className="grid min-h-[320px] place-items-center lg:min-h-[480px]">
-          <video className="max-h-[620px] w-full" controls playsInline src={lesson.videoUrl}>
-            Your browser does not support video playback.
-          </video>
+          <VideoPlayer src={lesson.videoUrl} title={lesson.title} />
         </div>
       );
     }

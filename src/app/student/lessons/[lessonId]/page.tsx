@@ -7,6 +7,7 @@ import { Lock, PlayCircle } from "lucide-react";
 
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { ErrorState, PageLoader, StudentLayout } from "@/components/kidclass/shared";
+import { VideoPlayer } from "@/components/kidclass/video-player";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -52,7 +53,7 @@ export default function LessonPage() {
               <section className="space-y-6">
                 <div className="overflow-hidden rounded-[2rem] bg-slate-900 shadow-xl">
                   {lesson.contentType === "video" && lesson.videoUrl ? (
-                    <video className="aspect-video w-full bg-black" controls src={lesson.videoUrl} />
+                    <VideoPlayer src={lesson.videoUrl} title={lesson.title} />
                   ) : (
                     <div className="grid aspect-video place-items-center bg-sky-700 text-white">
                       <PlayCircle className="size-24 text-yellow-300" />
