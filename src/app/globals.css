@@ -128,3 +128,27 @@
     @apply font-sans;
   }
 }
+
+@keyframes kid-float {
+  0%, 100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+}
+
+.kid-float {
+  animation: kid-float 4s ease-in-out infinite;
+}
+
+.kid-float-delayed {
+  animation: kid-float 4.5s ease-in-out 0.8s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kid-float,
+  .kid-float-delayed {
+    animation: none;
+  }
+}
