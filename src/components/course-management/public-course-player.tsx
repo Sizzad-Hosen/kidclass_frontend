@@ -23,7 +23,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { PublicQuizDialog } from "@/components/course-management/public-quiz-dialog";
-import { VideoPlayer } from "@/components/kidclass/video-player";
+import { getVideoEmbedUrl, VideoPlayer } from "@/components/kidclass/video-player";
 import type {
   CourseModule,
   CourseProgress,
@@ -49,30 +49,6 @@ const formatDuration = (seconds?: number) => {
   if (!seconds) return "Self paced";
   const minutes = Math.max(1, Math.ceil(seconds / 60));
   return `${minutes} min`;
-};
-
-const videoEmbedUrl = (url?: string) => {
-  if (!url) return null;
-
-  try {
-    const parsed = new URL(url);
-    if (parsed.hostname.includes("youtube.com")) {
-      const id = parsed.searchParams.get("v");
-      return id ? `https://www.youtube.com/embed/${id}` : null;
-    }
-    if (parsed.hostname === "youtu.be") {
-      const id = parsed.pathname.split("/").filter(Boolean)[0];
-      return id ? `https://www.youtube.com/embed/${id}` : null;
-    }
-    if (parsed.hostname.includes("vimeo.com")) {
-      const id = parsed.pathname.split("/").filter(Boolean).at(-1);
-      return id ? `https://player.vimeo.com/video/${id}` : null;
-    }
-  } catch {
-    return null;
-  }
-
-  return null;
 };
 
 export function PublicCoursePlayer({
@@ -168,7 +144,7 @@ export function PublicCoursePlayer({
   };
 
   return (
-    <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_24px_70px_-35px_rgba(15,23,42,0.35)]">
+    <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_24px_70px_-35px_rgba(15,23,42,0.35)] sm:rounded-[2rem]">
       <header className="flex flex-col gap-5 border-b border-slate-200 bg-gradient-to-r from-white via-sky-50 to-indigo-50 px-5 py-6 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-4">
           <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-[#14698d] text-white shadow-lg shadow-sky-900/15">
@@ -393,7 +369,7 @@ function LessonViewer({
   const { lesson, milestone, module } = entry;
 
   return (
-    <div className="flex min-h-[640px] flex-col">
+    <div className="flex flex-col lg:min-h-[640px]">
       <div className="border-b border-slate-100 px-5 py-5 sm:px-8">
         <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-700">
           <span>{milestone.title}</span>
@@ -442,14 +418,14 @@ function LessonViewer({
 
 function LessonContent({ lesson }: { lesson: Lesson }) {
   if (lesson.contentType === "video") {
-    const embedUrl = videoEmbedUrl(lesson.videoUrl);
+    const embedUrl = getVideoEmbedUrl(lesson.videoUrl);
     if (embedUrl) {
       return (
-        <div className="aspect-video min-h-[280px] w-full lg:min-h-[480px]">
+        <div className="relative aspect-video w-full">
           <iframe
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
-            className="size-full"
+            className="absolute inset-0 size-full border-0"
             src={embedUrl}
             title={lesson.title}
           />
@@ -458,7 +434,7 @@ function LessonContent({ lesson }: { lesson: Lesson }) {
     }
     if (lesson.videoUrl) {
       return (
-        <div className="grid min-h-[320px] place-items-center lg:min-h-[480px]">
+        <div className="w-full">
           <VideoPlayer src={lesson.videoUrl} title={lesson.title} />
         </div>
       );

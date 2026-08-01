@@ -18,6 +18,30 @@ import { Button } from "@/components/ui/button";
 
 const playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
+export const getVideoEmbedUrl = (url?: string) => {
+  if (!url) return null;
+
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname.includes("youtube.com")) {
+      const id = parsed.searchParams.get("v") ?? parsed.pathname.split("/").filter(Boolean).at(-1);
+      return id ? `https://www.youtube.com/embed/${id}` : null;
+    }
+    if (parsed.hostname === "youtu.be") {
+      const id = parsed.pathname.split("/").filter(Boolean)[0];
+      return id ? `https://www.youtube.com/embed/${id}` : null;
+    }
+    if (parsed.hostname.includes("vimeo.com")) {
+      const id = parsed.pathname.split("/").filter(Boolean).at(-1);
+      return id ? `https://player.vimeo.com/video/${id}` : null;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+};
+
 const formatTime = (seconds: number) => {
   if (!Number.isFinite(seconds)) return "0:00";
   const minutes = Math.floor(seconds / 60);
@@ -41,6 +65,21 @@ export function VideoPlayer({
   const [volume, setVolume] = useState(1);
   const [muted, setMuted] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
+  const embedUrl = getVideoEmbedUrl(src);
+
+  if (embedUrl) {
+    return (
+      <div className="relative aspect-video w-full overflow-hidden bg-black">
+        <iframe
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          className="absolute inset-0 size-full border-0"
+          src={embedUrl}
+          title={title}
+        />
+      </div>
+    );
+  }
 
   const togglePlayback = async () => {
     const video = videoRef.current;
@@ -123,12 +162,12 @@ export function VideoPlayer({
 
   return (
     <div
-      className="group relative flex aspect-video w-full items-center justify-center overflow-hidden bg-black"
+      className="group relative flex aspect-video w-full max-w-full items-center justify-center overflow-hidden bg-black"
       ref={containerRef}
     >
       <video
         aria-label={title}
-        className="max-h-full w-full"
+        className="size-full object-contain"
         onClick={togglePlayback}
         onEnded={() => {
           setPlaying(false);
@@ -152,17 +191,17 @@ export function VideoPlayer({
       {!playing ? (
         <button
           aria-label="Play video"
-          className="absolute grid size-20 place-items-center rounded-full bg-white/90 text-sky-800 shadow-2xl transition hover:scale-105"
+          className="absolute grid size-14 place-items-center rounded-full bg-white/90 text-sky-800 shadow-2xl transition hover:scale-105 sm:size-20"
           onClick={togglePlayback}
           type="button"
         >
-          <Play className="ml-1 size-9 fill-current" />
+          <Play className="ml-1 size-7 fill-current sm:size-9" />
         </button>
       ) : null}
 
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent px-3 pb-3 pt-10 text-white opacity-100 transition sm:px-5">
-        <div className="flex items-center gap-3">
-          <span className="w-11 text-right text-xs tabular-nums">{formatTime(currentTime)}</span>
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent px-2 pb-2 pt-8 text-white opacity-100 transition sm:px-5 sm:pb-3 sm:pt-10">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className="w-9 text-right text-[10px] tabular-nums sm:w-11 sm:text-xs">{formatTime(currentTime)}</span>
           <input
             aria-label="Video progress"
             className="h-1.5 min-w-0 flex-1 cursor-pointer accent-sky-500"
@@ -176,16 +215,16 @@ export function VideoPlayer({
             type="range"
             value={Math.min(currentTime, duration || 0)}
           />
-          <span className="w-11 text-xs tabular-nums">{formatTime(duration)}</span>
+          <span className="w-9 text-[10px] tabular-nums sm:w-11 sm:text-xs">{formatTime(duration)}</span>
         </div>
 
-        <div className="mt-2 flex flex-wrap items-center gap-1">
-          <ControlButton label="Restart" onClick={restart}><RotateCcw /></ControlButton>
-          <ControlButton label="Back 10 seconds" onClick={() => seek(-10)}><Rewind /></ControlButton>
+        <div className="mt-1 flex items-center gap-0.5 sm:mt-2 sm:gap-1">
+          <ControlButton className="hidden sm:inline-flex" label="Restart" onClick={restart}><RotateCcw /></ControlButton>
+          <ControlButton className="hidden sm:inline-flex" label="Back 10 seconds" onClick={() => seek(-10)}><Rewind /></ControlButton>
           <ControlButton label={playing ? "Pause" : "Play"} onClick={togglePlayback}>
             {playing ? <Pause className="fill-current" /> : <Play className="fill-current" />}
           </ControlButton>
-          <ControlButton label="Forward 10 seconds" onClick={() => seek(10)}><FastForward /></ControlButton>
+          <ControlButton className="hidden sm:inline-flex" label="Forward 10 seconds" onClick={() => seek(10)}><FastForward /></ControlButton>
           <ControlButton label={muted ? "Unmute" : "Mute"} onClick={toggleMute}>
             {muted ? <VolumeX /> : <Volume2 />}
           </ControlButton>
@@ -201,7 +240,7 @@ export function VideoPlayer({
           />
 
           <div className="ml-auto flex items-center gap-1">
-            <label className="flex h-8 items-center gap-1 rounded-lg bg-white/10 px-2 text-xs font-bold">
+            <label className="flex h-8 items-center gap-1 rounded-lg bg-white/10 px-1.5 text-[10px] font-bold sm:px-2 sm:text-xs">
               <span className="hidden sm:inline">Speed</span>
               <select
                 aria-label="Playback speed with original voice pitch"
@@ -216,7 +255,7 @@ export function VideoPlayer({
                 ))}
               </select>
             </label>
-            <ControlButton label="Picture in picture" onClick={openPictureInPicture}>
+            <ControlButton className="hidden sm:inline-flex" label="Picture in picture" onClick={openPictureInPicture}>
               <PictureInPicture2 />
             </ControlButton>
             <ControlButton label="Fullscreen" onClick={openFullscreen}><Maximize /></ControlButton>
@@ -229,17 +268,19 @@ export function VideoPlayer({
 
 function ControlButton({
   children,
+  className,
   label,
   onClick,
 }: {
   children: React.ReactNode;
+  className?: string;
   label: string;
   onClick: () => void;
 }) {
   return (
     <Button
       aria-label={label}
-      className="bg-white/10 text-white hover:bg-white/20"
+      className={`size-8 bg-white/10 p-0 text-white hover:bg-white/20 [&_svg]:size-4 sm:size-9 ${className ?? ""}`}
       onClick={onClick}
       size="icon"
       title={label}

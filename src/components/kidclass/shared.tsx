@@ -149,11 +149,11 @@ export function CourseCard({
   actionDisabled?: boolean;
 }) {
   return (
-    <Card className="rounded-[2rem] border-sky-100 bg-white p-3 shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
-      <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-sky-100">
+    <Card className="min-w-0 rounded-[2rem] border-sky-100 bg-white p-3 shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+      <div className="relative aspect-video overflow-hidden rounded-2xl bg-slate-100 sm:aspect-[4/3] sm:rounded-3xl">
         <Image
           alt={course.title}
-          className="object-cover"
+          className="object-contain"
           fill
           sizes="(max-width: 768px) 100vw, 33vw"
           src={mascotImage(course)}

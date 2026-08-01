@@ -79,12 +79,12 @@ export default function CourseDetailsPage() {
 
   return (
     <PageShell>
-      <section className="mx-auto max-w-7xl px-5 py-12">
-        <div className="grid items-center gap-10 rounded-[2.5rem] bg-sky-700 p-8 text-white md:grid-cols-[1fr_0.9fr] md:p-12">
+      <section className="mx-auto max-w-7xl px-3 py-6 sm:px-5 sm:py-12">
+        <div className="grid min-w-0 items-center gap-6 rounded-2xl bg-sky-700 p-5 text-white sm:rounded-[2.5rem] sm:p-8 md:grid-cols-[1fr_0.9fr] md:p-12">
           <div>
             <Badge variant="yellow">{course.category ?? "Class Adventure"}</Badge>
-            <h1 className="mt-6 text-5xl font-black leading-tight">{course.title}</h1>
-            <p className="mt-5 max-w-2xl text-xl leading-8 text-sky-50">{course.description}</p>
+            <h1 className="mt-5 break-words text-3xl font-black leading-tight sm:mt-6 sm:text-5xl">{course.title}</h1>
+            <p className="mt-4 max-w-2xl text-base leading-7 text-sky-50 sm:mt-5 sm:text-xl sm:leading-8">{course.description}</p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Button className="h-14 rounded-full bg-yellow-300 px-8 text-lg text-yellow-950 shadow-md" disabled={isEnrolling} onClick={handleEnroll}>
                 {isEnrolling ? "Enrolling..." : existingEnrollment ? "Continue Class" : "Enroll Now"}
@@ -94,8 +94,8 @@ export default function CourseDetailsPage() {
               </Button>
             </div>
           </div>
-          <div className="relative aspect-square overflow-hidden rounded-sm bg-yellow-100">
-            <Image alt={course.title} className="object-cover" fill src={mascotImage(course)} unoptimized />
+          <div className="relative aspect-video min-w-0 overflow-hidden rounded-2xl bg-white/95 md:aspect-square">
+            <Image alt={course.title} className="object-contain" fill sizes="(max-width: 768px) 100vw, 45vw" src={mascotImage(course)} unoptimized />
           </div>
         </div>
 

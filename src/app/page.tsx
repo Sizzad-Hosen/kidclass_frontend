@@ -400,10 +400,10 @@ function LessonCard({ course, index }: { course: Course; index: number }) {
 
   return (
     <article className="group overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-slate-200">
-      <div className="relative aspect-[1.45/1] overflow-hidden bg-sky-100">
+      <div className="relative aspect-video overflow-hidden bg-sky-100 sm:aspect-[1.45/1]">
         <Image
           alt={course.title}
-          className="object-cover transition duration-500 group-hover:scale-105"
+          className="object-contain transition duration-500 group-hover:scale-105"
           fill
           sizes="(max-width: 768px) 92vw, 31vw"
           src={course.thumbnailImage || "/kidclass-mascot.png"}
